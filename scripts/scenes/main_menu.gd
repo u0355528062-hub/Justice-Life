@@ -68,10 +68,19 @@ func _build_scene() -> void:
 	sl.light_color = Color(1.0, 0.86, 0.66)
 	sl.light_energy = 22.0
 	sl.spot_range = 20.0
-	sl.spot_angle = 16.0
+	sl.spot_angle = 24.0
 	sl.shadow_enabled = true
 	sl.light_volumetric_fog_energy = 3.0
 	add_child(sl)
+	var em := SpotLight3D.new()
+	em.position = Vector3(-1.5, 8.5, -1.0)
+	em.look_at_from_position(em.position, Vector3(0, 4.4, -5.8))
+	em.light_color = Color(1.0, 0.82, 0.6)
+	em.light_energy = 9.0
+	em.spot_range = 14.0
+	em.spot_angle = 20.0
+	em.light_volumetric_fog_energy = 1.2
+	add_child(em)
 	var fill := WB.omni(self, Vector3(-4, 3, 2), Color(0.4, 0.5, 0.8), 0.4, 12.0)
 	fill.light_volumetric_fog_energy = 0.2
 	_cam = Camera3D.new()
