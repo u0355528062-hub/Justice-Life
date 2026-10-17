@@ -101,8 +101,8 @@ static func decide(gs) -> Dictionary:
 	var legal_max: int = gs.max_prison_months()
 	if randf() < acquittal_chance(gs):
 		v.guilty = false
-		v.headline = "ACQUITTÉ" if k == "X" else "RELAXÉ"
-		v.detail = "Le tribunal estime que les faits ne sont pas suffisamment établis. Le doute profite à l'%s." % gs.jurisdiction().accused
+		v.headline = ("ACQUITTÉ" if k == "X" else "RELAXÉ") + ("E" if gs.player_female else "")
+		v.detail = "La juridiction estime que les faits ne sont pas suffisamment établis. Le doute profite à l'%s." % gs.jurisdiction().accused
 		return v
 
 	var mod := modifier(gs) * randf_range(0.85, 1.08)
@@ -110,7 +110,7 @@ static func decide(gs) -> Dictionary:
 		var f: int = int(round(gs.max_fine() * 0.3 * mod / 10.0) * 10)
 		v.fine = clamp(f, 20, gs.max_fine())
 		v.headline = "AMENDE"
-		v.detail = "Condamné à une amende de %s." % InfractionDB.format_eur(v.fine)
+		v.detail = "Condamné%s à une amende de %s." % [gs.e(), InfractionDB.format_eur(v.fine)]
 		_extras(gs, v)
 		return v
 
@@ -124,7 +124,7 @@ static func decide(gs) -> Dictionary:
 		var f2: int = int(round(gs.max_fine() * 0.06 * mod / 50.0) * 50)
 		v.fine = max(f2, 150)
 		v.headline = "AMENDE"
-		v.detail = "Condamné à une amende de %s." % InfractionDB.format_eur(v.fine)
+		v.detail = "Condamné%s à une amende de %s." % [gs.e(), InfractionDB.format_eur(v.fine)]
 		_extras(gs, v)
 		return v
 
@@ -151,13 +151,13 @@ static func decide(gs) -> Dictionary:
 	var word := "de réclusion criminelle" if k == "X" else "d'emprisonnement"
 	if months >= InfractionDB.PERPETUITE:
 		v.headline = "PERPÉTUITÉ"
-		v.detail = "Condamné à la réclusion criminelle à perpétuité, assortie d'une période de sûreté de 18 ans."
+		v.detail = "Condamné" + gs.e() + " à la réclusion criminelle à perpétuité, assortie d'une période de sûreté de 18 ans."
 	elif v.sursis == months:
 		v.headline = "SURSIS"
-		v.detail = "Condamné à %s %s, entièrement assortis du sursis simple." % [InfractionDB.prison_label(months), word]
+		v.detail = "Condamné%s à %s %s, entièrement assortis du sursis simple." % [gs.e(), InfractionDB.prison_label(months), word]
 	else:
 		v.headline = "COUPABLE"
-		v.detail = "Condamné à %s %s" % [InfractionDB.prison_label(months), word]
+		v.detail = "Condamné%s à %s %s" % [gs.e(), InfractionDB.prison_label(months), word]
 		if v.sursis > 0:
 			v.detail += ", dont %s avec sursis" % InfractionDB.prison_label(v.sursis)
 		v.detail += "."

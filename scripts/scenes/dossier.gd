@@ -14,6 +14,7 @@ var _count_label: Label
 var _first: LineEdit
 var _last: LineEdit
 var _seg_record: Array = []
+var _seg_gender: Array = []
 var _seg_circ: Array = []
 var _aggr_box: HFlowContainer
 
@@ -222,9 +223,13 @@ func _build_case() -> Control:
 	dice.pressed.connect(func():
 		GameState.random_identity()
 		_first.text = GameState.player_first
-		_last.text = GameState.player_last)
+		_last.text = GameState.player_last
+		for i in _seg_gender.size():
+			_seg_gender[i].button_pressed = (i == 1) == GameState.player_female)
 	nr.add_child(dice)
 	v.add_child(nr)
+	_seg_gender = _segmented(v, [["m", "Homme"], ["f", "Femme"]], "f" if GameState.player_female else "m",
+		func(val): GameState.player_female = val == "f")
 
 	v.add_child(UIKit.spacer(4))
 	v.add_child(UIKit.caps("Casier judiciaire", 11, UIKit.TEXT_MUTED, 3.0))

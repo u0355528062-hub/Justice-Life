@@ -554,6 +554,8 @@ func _choice_button(i: int, text: String) -> Button:
 
 
 func _show_line(speaker: String, role: String, text: String, npc: Human) -> void:
+	if Devtools.autoplay:
+		print("[%s] %s" % [speaker, text.left(110)])
 	_dlg.visible = true
 	_dlg_name.text = speaker
 	_dlg_name.visible = speaker != ""

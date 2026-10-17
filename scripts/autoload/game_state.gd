@@ -12,14 +12,17 @@ const MONTHS_FR := ["janvier", "février", "mars", "avril", "mai", "juin", "juil
 	"août", "septembre", "octobre", "novembre", "décembre"]
 const DAYS_FR := ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
-const FIRST_NAMES := ["Lucas", "Hugo", "Nathan", "Karim", "Thomas", "Yanis", "Maxime", "Léa",
-	"Camille", "Inès", "Sarah", "Manon", "Julien", "Sofiane", "Clara", "Mehdi", "Chloé", "Enzo"]
+const FIRST_NAMES_M := ["Lucas", "Hugo", "Nathan", "Karim", "Thomas", "Yanis", "Maxime", "Julien",
+	"Sofiane", "Mehdi", "Enzo", "Kevin", "Antoine", "Moussa"]
+const FIRST_NAMES_F := ["Léa", "Camille", "Inès", "Sarah", "Manon", "Clara", "Chloé", "Yasmine",
+	"Laura", "Océane", "Aïcha", "Julie"]
 const LAST_NAMES := ["Martin", "Bernard", "Moreau", "Lefèvre", "Benali", "Garcia", "Roux",
 	"Fontaine", "Diallo", "Mercier", "Lambert", "Haddad", "Girard", "Perrin", "Nguyen"]
 
 # ── Dossier ──────────────────────────────────────────────────────────────────
 var player_first := "Lucas"
 var player_last := "Martin"
+var player_female := false
 var birth_date := "12 avril 1997"
 var birth_place := "Lyon (69)"
 var address := "14 rue des Tanneurs, Lyon 7e"
@@ -107,10 +110,28 @@ func _setup_inputs() -> void:
 
 
 func random_identity() -> void:
-	player_first = FIRST_NAMES.pick_random()
+	player_female = randf() < 0.35
+	player_first = (FIRST_NAMES_F if player_female else FIRST_NAMES_M).pick_random()
 	player_last = LAST_NAMES.pick_random()
 	var d := randi_range(1, 28)
 	birth_date = "%d %s %d" % [d, MONTHS_FR.pick_random(), randi_range(1975, 2004)]
+
+
+## Accord en genre : « e » si le personnage joué est une femme.
+func e() -> String:
+	return "e" if player_female else ""
+
+
+func g(masc: String, fem: String) -> String:
+	return fem if player_female else masc
+
+
+static func ucfirst(s: String) -> String:
+	return s.substr(0, 1).to_upper() + s.substr(1) if s != "" else s
+
+
+static func lcfirst(s: String) -> String:
+	return s.substr(0, 1).to_lower() + s.substr(1) if s != "" else s
 
 
 func full_name() -> String:
@@ -146,6 +167,7 @@ func reset_procedure() -> void:
 	released_early = false
 	family_contact = false
 	clock_minutes = 23 * 60 + 41
+	gav_start_minutes = 0.0
 	match circumstance:
 		"flagrant": evidence = randf_range(0.82, 0.97)
 		"plainte": evidence = randf_range(0.45, 0.8)
@@ -239,20 +261,20 @@ func jurisdiction() -> Dictionary:
 	if k == "X":
 		if m > 240 or record == "recidive":
 			return {"name": "Cour d'assises", "short": "assises", "judges": 3, "jury": 6,
-				"accused": "accusé", "room": "Salle des assises"}
+				"accused": "accusé" + e(), "room": "Salle des assises"}
 		return {"name": "Cour criminelle départementale", "short": "ccd", "judges": 5, "jury": 0,
-			"accused": "accusé", "room": "Salle d'audience criminelle"}
+			"accused": "accusé" + e(), "room": "Salle d'audience criminelle"}
 	if k == "D":
 		return {"name": "Tribunal correctionnel", "short": "correctionnel", "judges": 3, "jury": 0,
-			"accused": "prévenu", "room": "Chambre des comparutions immédiates"}
+			"accused": "prévenu" + e(), "room": "Chambre des comparutions immédiates"}
 	return {"name": "Tribunal de police", "short": "police", "judges": 1, "jury": 0,
-		"accused": "prévenu", "room": "Tribunal de police"}
+		"accused": "prévenu" + e(), "room": "Tribunal de police"}
 
 
 func charges_sentence() -> String:
 	var parts := []
 	for d in infractions():
-		parts.append(d.name.to_lower())
+		parts.append(lcfirst(d.name))
 	if parts.size() <= 1:
 		return parts[0] if parts.size() == 1 else ""
 	return ", ".join(parts.slice(0, parts.size() - 1)) + " et " + parts[-1]
