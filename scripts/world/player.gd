@@ -79,6 +79,16 @@ func lock(move: bool, yaw_limit_deg: float = -1.0) -> void:
 		look_limit_yaw = -1.0
 
 
+## Assis (chaise, banc, box) : plus de physique ni de collision, pour ne pas être
+## repoussé par le mobilier.
+func set_seated(on: bool) -> void:
+	set_physics_process(not on)
+	for c in get_children():
+		if c is CollisionShape3D:
+			c.disabled = on
+	velocity = Vector3.ZERO
+
+
 func set_eye_height(h: float, t: float = 0.6) -> void:
 	_eye_target = h
 	if t <= 0.0:

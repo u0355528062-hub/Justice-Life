@@ -62,6 +62,9 @@ var reductions_months := 0
 var released_early := false
 var family_contact := false
 
+# ── Options ──────────────────────────────────────────────────────────────────
+var quality := 0                  # 0 ultra | 1 élevée | 2 moyenne
+
 # ── Horloge ──────────────────────────────────────────────────────────────────
 var clock_minutes := 0.0          # minutes depuis 00:00 du jour 0
 var start_weekday := 1            # mardi

@@ -361,6 +361,21 @@ func _build_pause() -> void:
 	sl.value_changed.connect(func(val): if player: player.mouse_sens = val)
 	sens.add_child(sl)
 	v.add_child(sens)
+	var q := HBoxContainer.new()
+	q.add_child(UIKit.label("Qualité graphique", 15, UIKit.TEXT_DIM))
+	var qo := OptionButton.new()
+	for item in ["Ultra", "Élevée", "Moyenne"]:
+		qo.add_item(item)
+	qo.selected = GameState.quality
+	qo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	qo.focus_mode = Control.FOCUS_NONE
+	qo.item_selected.connect(func(i):
+		GameState.quality = i
+		var lvl: Node = get_parent()
+		if lvl and lvl.has_method("apply_quality"):
+			lvl.apply_quality())
+	q.add_child(qo)
+	v.add_child(q)
 	var b2 := UIKit.button("Plein écran")
 	b2.pressed.connect(func():
 		var full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
@@ -584,7 +599,11 @@ func _show_line(speaker: String, role: String, text: String, npc: Human) -> void
 	_typing = false
 	_dlg_text.visible_characters = -1
 	if npc:
-		get_tree().create_timer(0.4).timeout.connect(func(): if is_instance_valid(npc): npc.say_anim(false))
+		var wr: WeakRef = weakref(npc)
+		get_tree().create_timer(0.4).timeout.connect(func():
+			var n = wr.get_ref()
+			if n:
+				n.say_anim(false))
 
 
 func _hide_dialogue() -> void:

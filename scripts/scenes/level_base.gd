@@ -6,7 +6,8 @@ var player: FPSPlayer
 var hud: HUD
 var env: Environment
 var world_env: WorldEnvironment
-var clock_rate := 0.0   # minutes de jeu par seconde réelle (0 = arrêtée)
+var clock_rate := 0.0
+var _sdfgi_base := -1
 
 
 func setup_environment(preset: String) -> void:
@@ -104,10 +105,29 @@ func setup_environment(preset: String) -> void:
 			env.ambient_light_energy = 0.08
 			env.volumetric_fog_density = 0.035
 			env.volumetric_fog_albedo = Color(1.0, 0.92, 0.8)
+	apply_quality()
 	if RenderingServer.get_rendering_device() == null:  # rendu Compatibility
 		env.sdfgi_enabled = false
 		env.volumetric_fog_enabled = false
 		env.ssil_enabled = false
+
+
+## Applique le niveau de qualité choisi (menu pause) à l'environnement courant.
+func apply_quality() -> void:
+	if env == null:
+		return
+	var q := GameState.quality
+	var full := RenderingServer.get_rendering_device() != null
+	if _sdfgi_base < 0:
+		_sdfgi_base = 1 if env.sdfgi_enabled else 0
+	env.sdfgi_enabled = full and q == 0 and _sdfgi_base == 1
+	env.ssil_enabled = full and q <= 1
+	env.ssr_enabled = q <= 1
+	env.volumetric_fog_enabled = full and q <= 1
+	env.ssao_enabled = true
+	get_viewport().scaling_3d_scale = 1.0 if q <= 1 else 0.77
+	get_viewport().msaa_3d = Viewport.MSAA_2X if q == 0 else Viewport.MSAA_DISABLED
+	get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if q == 0 else Viewport.SCREEN_SPACE_AA_FXAA
 
 
 func spawn_player(pos: Vector3, yaw: float) -> FPSPlayer:

@@ -39,6 +39,7 @@ func _ready() -> void:
 		_seat_pos = Vector3(-2.6, 0.0, -8.0)
 		spawn_player(_seat_pos, 0.0)
 	player.set_eye_height(_seat_eye, 0.0)
+	player.set_seated(true)
 	player.lock(true, 95.0)
 	_run()
 

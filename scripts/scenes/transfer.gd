@@ -15,7 +15,7 @@ func _ready() -> void:
 	spawn_player(Vector3(0, 0.0, 0), 0.0)
 	player.lock(true, 75.0)
 	player.set_eye_height(1.18, 0.0)
-	player.set_physics_process(false)
+	player.set_seated(true)
 	hud.show_clock(true)
 	_run()
 

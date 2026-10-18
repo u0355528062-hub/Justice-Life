@@ -634,6 +634,7 @@ func _leave_cell_to(pos: Vector3, yaw: float, seated: bool) -> void:
 	player.teleport(pos, yaw)
 	player.lock(true, 80.0)
 	if seated:
+		player.set_seated(true)
 		player.set_eye_height(1.2, 0.0)
 	hud.hide_timer()
 
@@ -643,6 +644,7 @@ func _back_to_cell() -> void:
 	Sfx.stop_loop("typing", 0.3)
 	player.set_dof(false)
 	player.set_eye_height(FPSPlayer.EYE_H, 0.0)
+	player.set_seated(false)
 	player.teleport(Vector3(7.2, 0, -16.6), PI / 2)
 	opj.desk_pose = 0.0
 	opj.set_sit(0.0)
@@ -944,6 +946,7 @@ func _audition_libre() -> void:
 	opj.set_sit(1.0)
 	opj.desk_pose = 1.0
 	player.teleport(OFFICE_PLAYER, 0.0)
+	player.set_seated(true)
 	player.set_eye_height(1.2, 0.0)
 	hud.set_phase("Audition libre", "Bureau de l'OPJ", "Procès-verbal d'audition")
 	Sfx.loop("typing", -20.0, 0.5)
