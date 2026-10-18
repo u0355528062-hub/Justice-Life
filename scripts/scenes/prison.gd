@@ -20,6 +20,8 @@ var _served := 0.0
 var _next_event := 2.0
 var _last_year_check := 0
 var _letters := 0
+var _resumed := false
+var _last_saved_month := -1
 
 
 func _ready() -> void:
@@ -32,7 +34,16 @@ func _ready() -> void:
 	var gs := GameState
 	if gs.verdict.is_empty():
 		gs.verdict = {"to_serve": 8, "incarcerated": true}
-	_months_total = float(gs.verdict.get("to_serve", 6))
+	_resumed = gs.prison_months_served > 0.0 and gs.prison_target > 0.0
+	if _resumed:
+		_months_total = gs.prison_target
+		_served = gs.prison_months_served
+		_last_year_check = int(_served / 12.0)
+		_next_event = _served + 1.5
+		player.teleport(Vector3(1.3, 0, -2.0), PI)
+	else:
+		_months_total = float(gs.verdict.get("to_serve", 6))
+		gs.prison_target = _months_total
 	gs.prison_total_months = int(_months_total)
 	_run()
 
@@ -133,6 +144,15 @@ func _run() -> void:
 	guard.look_target = player.cam
 	hud.set_phase("Détention", "Maison d'arrêt", "Quartier arrivants · Cellule 214")
 	Sfx.loop("room", -20.0, 2.0)
+	if _resumed:
+		guard.visible = false
+		await Transition.card("Reprise de la détention", "Mois %d sur %d." % [int(_served) + 1, int(ceil(_months_total))], 1.6)
+		Transition.fade_in(1.4)
+		player.lock(false)
+		for it in [bed_it, window_it, table_it, door_it, sink_it]:
+			it.enabled = true
+		await _serve()
+		return
 	await Transition.chapter("Chapitre V", "La détention", "1 mois = 1 minute", 2.0)
 	door.rotation.y = -PI * 0.55
 	Transition.fade_in(1.6)
@@ -170,6 +190,10 @@ func _serve() -> void:
 		gs.prison_months_served = _served
 		gs.advance_minutes(dm * 30.0 * 24.0 * 60.0)
 		_update_hud()
+		if int(_served) != _last_saved_month:
+			_last_saved_month = int(_served)
+			gs.prison_target = _months_total
+			gs.save_detention()
 		if _served >= _next_event:
 			_next_event = _served + randf_range(1.5, 3.5)
 			await _random_event()
@@ -331,7 +355,15 @@ func _parole_hearing() -> void:
 	_busy = false
 
 
+## Appelé par le menu pause avant de revenir au menu principal.
+func on_quit() -> void:
+	GameState.prison_target = _months_total
+	GameState.prison_months_served = _served
+	GameState.save_detention()
+
+
 func _release() -> void:
+	GameState.clear_save()
 	hud.hide_timer()
 	hud.set_objective("")
 	if lying:

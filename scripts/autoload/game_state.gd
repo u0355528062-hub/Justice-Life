@@ -60,6 +60,7 @@ var prison_months_served := 0.0
 var prison_total_months := 0
 var reductions_months := 0
 var released_early := false
+var prison_target := 0.0          # durée totale à purger (mois, réductions incluses)
 var family_contact := false
 
 # ── Options ──────────────────────────────────────────────────────────────────
@@ -73,6 +74,15 @@ var start_month := 2              # mars (index)
 var start_year := 2026
 var gav_start_minutes := 0.0
 var gav_max_hours := 24
+
+
+const SAVE_PATH := "user://detention.save"
+const SAVE_KEYS := ["player_first", "player_last", "player_female", "birth_date", "birth_place", "address",
+	"record", "circumstance", "lawyer", "lawyer_name", "asked_doctor", "asked_family", "situation",
+	"admissions", "denials", "silences", "minimizations", "lies", "attitude", "evidence",
+	"detention_provisoire_months", "outcome_after_gav", "verdict", "conduct", "prison_months_served",
+	"prison_total_months", "prison_target", "reductions_months", "released_early", "family_contact",
+	"clock_minutes", "gav_start_minutes", "gav_max_hours", "quality"]
 
 
 func _ready() -> void:
@@ -110,6 +120,51 @@ func _setup_inputs() -> void:
 		mb.button_index = MOUSE_BUTTON_LEFT
 		InputMap.action_add_event("click", mb)
 		InputMap.action_add_event("advance", mb.duplicate())
+
+
+# ── Sauvegarde (détention) ───────────────────────────────────────────────────
+func has_save() -> bool:
+	return FileAccess.file_exists(SAVE_PATH)
+
+
+func save_detention() -> void:
+	var d := {"selected": Array(selected), "aggravations": Array(aggravations)}
+	for k in SAVE_KEYS:
+		d[k] = get(k)
+	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if f:
+		f.store_var(d)
+
+
+func load_detention() -> bool:
+	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if f == null:
+		return false
+	var d = f.get_var()
+	if not d is Dictionary:
+		return false
+	for k in SAVE_KEYS:
+		if d.has(k):
+			set(k, d[k])
+	selected.assign(d.get("selected", []))
+	aggravations.assign(d.get("aggravations", []))
+	return true
+
+
+func save_summary() -> String:
+	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if f == null:
+		return ""
+	var d = f.get_var()
+	if not d is Dictionary:
+		return ""
+	return "%s %s — mois %d / %d" % [d.get("player_first", ""), String(d.get("player_last", "")).to_upper(),
+		int(d.get("prison_months_served", 0.0)) + 1, int(ceil(float(d.get("prison_target", 0.0))))]
+
+
+func clear_save() -> void:
+	if has_save():
+		DirAccess.remove_absolute(SAVE_PATH)
 
 
 func random_identity() -> void:

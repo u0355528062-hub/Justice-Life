@@ -161,7 +161,17 @@ func _build_ui() -> void:
 	var sp := Control.new()
 	sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(sp)
-	var b1 := UIKit.button("Ouvrir un nouveau dossier", true, 19)
+	if GameState.has_save():
+		var rb := UIKit.button("Reprendre la détention", true, 19)
+		rb.custom_minimum_size = Vector2(400, 60)
+		rb.pressed.connect(func():
+			if GameState.load_detention():
+				Transition.goto("res://scenes/prison.tscn", 0.8))
+		v.add_child(rb)
+		var rs := UIKit.label(GameState.save_summary(), 14, UIKit.TEXT_DIM, "mono", 450)
+		v.add_child(rs)
+		v.add_child(UIKit.spacer(12))
+	var b1 := UIKit.button("Ouvrir un nouveau dossier", not GameState.has_save(), 19)
 	b1.custom_minimum_size = Vector2(400, 60)
 	b1.pressed.connect(_on_new)
 	v.add_child(b1)

@@ -381,8 +381,11 @@ func _build_pause() -> void:
 		var full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN))
 	v.add_child(b2)
-	var b3 := UIKit.button("Abandonner et revenir au menu")
+	var b3 := UIKit.button("Revenir au menu principal")
 	b3.pressed.connect(func():
+		var lvl2: Node = get_parent()
+		if lvl2 and lvl2.has_method("on_quit"):
+			lvl2.on_quit()
 		get_tree().paused = false
 		Transition.goto("res://scenes/main_menu.tscn"))
 	v.add_child(b3)

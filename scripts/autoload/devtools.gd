@@ -32,6 +32,8 @@ func _ready() -> void:
 	time_mult = float(args.get("speed", "1"))
 	if args.has("preset"):
 		_apply_preset(args.preset)
+	if args.has("load"):
+		print("Sauvegarde chargée : ", GameState.load_detention(), " — ", GameState.save_summary())
 	if args.has("scene"):
 		var p := "res://scenes/%s.tscn" % args.scene
 		get_tree().change_scene_to_file.call_deferred(p)
