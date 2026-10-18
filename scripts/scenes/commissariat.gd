@@ -57,8 +57,8 @@ func _build_exterior() -> void:
 	var ext := Node3D.new()
 	add_child(ext)
 	WB.box(ext, Vector3(40, 0.2, 18), Vector3(0, -0.12, 12), Mats.asphalt(0.85))
-	WB.box(ext, Vector3(40, 0.16, 3.4), Vector3(0, 0.0, 1.7), Mats.concrete(Color(0.42, 0.42, 0.42), "sidewalk"))
-	WB.box(ext, Vector3(40, 0.18, 0.25), Vector3(0, 0.0, 3.45), Mats.concrete(Color(0.6, 0.6, 0.58), "curb"))
+	WB.box(ext, Vector3(40, 0.2, 3.4), Vector3(0, -0.1, 1.7), Mats.concrete(Color(0.42, 0.42, 0.42), "sidewalk"))
+	WB.box(ext, Vector3(40, 0.06, 0.25), Vector3(0, -0.02, 3.45), Mats.concrete(Color(0.6, 0.6, 0.58), "curb"), false)
 	# Façade
 	var facade := Mats.concrete(Color(0.72, 0.7, 0.66), "facade")
 	WB.box(ext, Vector3(9.0, 8.0, 0.4), Vector3(-5.6, 4.0, 0.2), facade)

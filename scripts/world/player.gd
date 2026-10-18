@@ -177,6 +177,13 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y = -0.1
 	move_and_slide()
+	# Montée automatique des petites marches (trottoirs, seuils, estrades basses)
+	if can_move and dir != Vector3.ZERO and is_on_wall():
+		var up := Vector3(0, 0.34, 0)
+		var fwd := dir * 0.18
+		if not test_move(global_transform, up) and not test_move(global_transform.translated(up), fwd):
+			global_position += up + dir * 0.06
+			velocity.y = 0.0
 
 	var hv := Vector2(velocity.x, velocity.z).length()
 	if hv > 0.3:

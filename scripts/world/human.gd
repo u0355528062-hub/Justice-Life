@@ -46,6 +46,7 @@ var mouth: MeshInstance3D
 var robe: MeshInstance3D
 var _robe_full_h := 1.38
 var _robe_last := -1.0
+var real: RealBody
 var _head_yaw := 0.0
 var _head_pitch := 0.0
 var _hip_h := 0.98
@@ -65,6 +66,10 @@ func _ready() -> void:
 	var path := "res://assets/characters/%s.glb" % role
 	if ResourceLoader.exists(path):
 		_load_glb(path)
+	elif RealBody.available() and not cfg.get("procedural", false):
+		real = RealBody.new()
+		add_child(real)
+		real.setup(self)
 	else:
 		_build()
 
@@ -400,7 +405,36 @@ func say_anim(on: bool) -> void:
 
 
 func head_node() -> Node3D:
+	if real and real.head_att:
+		return real.head_att
 	return head if head else self
+
+
+func _update_real(delta: float) -> void:
+	if walking:
+		_phase += delta * walk_speed * 5.2
+	else:
+		_phase = lerp(_phase, round(_phase / PI) * PI, delta * 6.0)
+	var yaw := 0.0
+	var pitch := 0.0
+	if look_target and is_instance_valid(look_target) and real.head_att:
+		var hp := real.head_att.global_position
+		var lp := global_transform.basis.inverse() * (look_target.global_position - hp)
+		if lp.length() > 0.1:
+			var dir := lp.normalized()
+			var a := atan2(-dir.x, -dir.z)
+			if absf(a) < 1.9:
+				yaw = clampf(a, -1.05, 1.05)
+				pitch = clampf(asin(clampf(dir.y, -1.0, 1.0)), -0.45, 0.35)
+	yaw += sin(_t * 0.31) * 0.05
+	_head_yaw = lerpf(_head_yaw, yaw, clampf(delta * 3.0, 0.0, 1.0))
+	_head_pitch = lerpf(_head_pitch, pitch, clampf(delta * 3.0, 0.0, 1.0))
+	_blink_t -= delta
+	if _blink_t <= 0.0:
+		_blink = 1.0
+		_blink_t = _rng.randf_range(2.0, 5.5)
+	_blink = maxf(0.0, _blink - delta * 7.0)
+	real.animate(self, delta, _t, _phase, _head_yaw, _head_pitch, _blink)
 
 
 func _process(delta: float) -> void:
@@ -408,8 +442,9 @@ func _process(delta: float) -> void:
 		return
 	_t += delta
 	if _glb:
-		if look_target:
-			pass
+		return
+	if real:
+		_update_real(delta)
 		return
 	if hips == null:
 		return
